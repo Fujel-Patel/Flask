@@ -1,40 +1,54 @@
 from flask import Flask, request, jsonify
+from extensions import db, jwt
 from routes.auth import auth_bp
 from utils.error_handler import register_error_handler
-app = Flask(__name__)
+from dotenv import load_dotenv
+import os
 
-app.config.from_object("config.Config")
 
-register_error_handler(app)
+def create_app():
+    load_dotenv()
+    app = Flask(__name__)
 
-app.register_blueprint(auth_bp, url_prefix="/auth")
+        # Config
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
-@app.route("/health")
-def home():
-    return jsonify({"success": "Flask chal raha hai"})
+    # Init extensions
+    db.init_app(app)
+    jwt.init_app(app)
 
-# query params
-# example -> /search?name=fujel&age=25
-# use -->They are used to identify a specific resource.
-@app.route("/search")
-def search():
-    name= request.args.get("name")
-    age= request.args.get("age")
+    # Register error handlers
+    register_error_handler(app)
 
-    return jsonify({
-        "name": name,
-        "age": age
-    })
+    # Register blueprints
+    app.register_blueprint(auth_bp, url_prefix="/auth")
 
-# URL params
-# use -->They are used to filter, sort, or search data.
-@app.route("/user/<username>")
-def user(username):
-    return jsonify({
-        "user": username
-    })
+    # Routes
+    @app.route("/health")
+    def health():
+        return jsonify({"success": "Flask chal raha hai"})
 
-# post request
+    @app.route("/search")
+    def search():
+        name = request.args.get("name")
+        age = request.args.get("age")
+
+        return jsonify({
+            "name": name,
+            "age": age
+        })
+
+    @app.route("/user/<username>")
+    def user(username):
+        return jsonify({
+            "user": username
+        })
+
+    return app
+
 
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True, use_reloader=False)
