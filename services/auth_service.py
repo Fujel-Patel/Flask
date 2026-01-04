@@ -1,7 +1,5 @@
 from flask import jsonify
-from database.fake_db import users
 from utils.exceptions import ValidationError
-from werkzeug.security import generate_password_hash, check_password_hash
 from utils.token import generate_token
 
 def create_user(email, password, age):

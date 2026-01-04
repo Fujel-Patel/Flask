@@ -4,7 +4,7 @@ from routes.auth import auth_bp
 from utils.error_handler import register_error_handler
 from dotenv import load_dotenv
 import os
-
+from sqlalchemy import text
 
 def create_app():
     load_dotenv()
@@ -19,6 +19,10 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
 
+    with app.app_context():
+        db.create_all()
+        db.session.execute(text("SELECT 1"))
+        print("DB connected & tables created")
     # Register error handlers
     register_error_handler(app)
 
@@ -51,4 +55,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True)
