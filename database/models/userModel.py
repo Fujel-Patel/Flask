@@ -1,8 +1,8 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, String, DateTime
-from extensions import db
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
+from database.models.BaseModel import BaseModel
 
-class User(db.Model):
+class User(BaseModel):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
@@ -24,7 +24,15 @@ class User(db.Model):
         nullable=False
     )
 
-    createdAt = Column(
-        DateTime,
-        default=datetime.utcnow
+    posts= relationship(
+        "post",
+        backref="user",
+        cascade= "all, delete_orphan"
     )
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "age": self.age,
+            "createdAt": self.createdAt.isoformat(),
+        }

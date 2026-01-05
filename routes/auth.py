@@ -20,6 +20,25 @@ def register():
             "message": "email, password and age are required"
         }), 400
 
+    if len(password) < 6:
+        return jsonify({
+            "success": False,
+            "message": "password length atleast 6 character"
+        }), 401
+    try:
+        age= int(age)
+    except ValueError:
+        return jsonify({
+            "success": False,
+            "message":"age must be a number"
+        })
+
+    if age < 13:
+        return jsonify({
+            "success": False,
+            "message": "age must be 18+"
+        })
+
     existingUser = User.query.filter_by(email=email).first()
     if existingUser:
         return jsonify({
@@ -84,12 +103,4 @@ def profile():
             "message": "User not found"
         }), 404
     
-    return jsonify({
-        "success": True, 
-        "user": {
-            "id": user.id,
-            "email": user.email,
-            "age": user.age,
-            "createdAt": user.createdAt.isoformat()
-        }
-    }), 200
+    return jsonify(user.to_dict()), 200
